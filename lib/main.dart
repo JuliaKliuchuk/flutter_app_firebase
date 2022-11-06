@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +41,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late SharedPreferences _sharedPrefs;
   static const String _pathSharedPrefsKey = 'path_pref';
+
+  String _brandDevice = '';
   String _path = '';
 
   @override
@@ -67,11 +70,6 @@ class _HomePageState extends State<HomePage> {
             onPressed: (() async {
               try {
                 _resetDataPref();
-                // await widget.remoteConfig.setConfigSettings(
-                //     RemoteConfigSettings(
-                //         fetchTimeout: const Duration(seconds: 10),
-                //         minimumFetchInterval: Duration.zero));
-                // await widget.remoteConfig.fetchAndActivate();
               } catch (e) {}
             }),
             child: const Icon(Icons.refresh),
@@ -94,11 +92,25 @@ class _HomePageState extends State<HomePage> {
 
 // загрузка path
   void _loadPath() {
+    final String path = widget.remoteConfig.getString('url');
+
     setState(() {
-      final String path = widget.remoteConfig.getString('url');
       _sharedPrefs.setString(_pathSharedPrefsKey, path);
     });
+
+    _checkBrandDevice();
   }
+
+// определение бренда телефона
+  void _checkBrandDevice() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    _brandDevice = androidInfo.brand;
+    log('brand ${androidInfo.brand}');
+  }
+
+// проверка на наличие симкарты
+  void _checkSimDevice() async {}
 
   // сбросить path
   Future<void> _resetDataPref() async {
