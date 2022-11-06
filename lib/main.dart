@@ -1,8 +1,10 @@
 import 'dart:developer';
+import 'package:flutter/material.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter_app_firebase/pages/SplashPage.dart';
+import 'package:flutter_app_firebase/pages/WebViewPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
@@ -57,24 +59,19 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Remoute config'),
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          // Image.network(widget.remoteConfig.getString('Image')),
-          Text(widget.remoteConfig.getString('url')),
-          Text('_path --- $_path'),
-          FloatingActionButton(
-            onPressed: (() async {
-              try {
-                _resetDataPref();
-              } catch (e) {}
-            }),
-            child: const Icon(Icons.refresh),
-          ),
-        ],
+      body: _path.isEmpty || _brandDevice.contains('google')
+          ? const SplashPage()
+          : WebViewPage(url: _path),
+      floatingActionButton: FloatingActionButton(
+        onPressed: (() {
+          _resetDataPref();
+          // await widget.remoteConfig.setConfigSettings(
+          //     RemoteConfigSettings(
+          //         fetchTimeout: const Duration(seconds: 10),
+          //         minimumFetchInterval: Duration.zero));
+          // await widget.remoteConfig.fetchAndActivate();
+        }),
+        child: const Icon(Icons.refresh),
       ),
     );
   }
