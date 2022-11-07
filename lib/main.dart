@@ -45,6 +45,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late SharedPreferences _sharedPrefs;
   static const String _pathSharedPrefsKey = 'path_pref';
+  static const String _isPhysicalDeviceSharedPrefsKey = 'isPhysicalDevice_pref';
+  static const String _brandDeviceSharedPrefsKey = 'brandDevice_pref';
 
   String _brandDevice = '';
   // bool _isSimDevice = false;
@@ -85,7 +87,6 @@ class _HomePageState extends State<HomePage> {
                   setState(() {
                     _sharedPrefs.setString(_pathSharedPrefsKey, _path);
                   }),
-                  log('url refresh --- $_path'),
                 }),
             icon: const Icon(Icons.refresh),
             tooltip: 'Обновить url'),
@@ -102,6 +103,7 @@ class _HomePageState extends State<HomePage> {
 
     if (_path.isEmpty) {
       _loadPath();
+      _checkBrandDevice();
     } else {
       return _path;
     }
@@ -110,20 +112,22 @@ class _HomePageState extends State<HomePage> {
 // загрузка path
   void _loadPath() {
     final String path = widget.remoteConfig.getString('url');
-
     setState(() {
       _sharedPrefs.setString(_pathSharedPrefsKey, path);
     });
-
-    _checkBrandDevice();
   }
 
 // определение бренда телефона
   void _checkBrandDevice() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    _brandDevice = androidInfo.brand!;
-    _isPhysicalDevice = androidInfo.isPhysicalDevice!;
+    _brandDevice = androidInfo.model;
+    _isPhysicalDevice = androidInfo.isPhysicalDevice;
+    setState(() {
+      _sharedPrefs.setString(_brandDeviceSharedPrefsKey, androidInfo.model);
+      _sharedPrefs.setBool(
+          _isPhysicalDeviceSharedPrefsKey, androidInfo.isPhysicalDevice);
+    });
   }
 
 // проверка на наличие симкарты
