@@ -17,6 +17,7 @@ void main() async {
     MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
+      theme: ThemeData.dark(),
       home: FutureBuilder<FirebaseRemoteConfig>(
         future: setupRemouteConfig(),
         builder: ((BuildContext context,
@@ -67,7 +68,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body:
           _path.isEmpty || _brandDevice.contains('google') || _isPhysicalDevice
-              ? const SplashPage()
+              ? SplashPage()
               : WebViewPage(url: _path),
       persistentFooterButtons: [
         IconButton(
