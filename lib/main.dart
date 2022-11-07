@@ -122,8 +122,8 @@ class _HomePageState extends State<HomePage> {
   void _checkBrandDevice() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    _brandDevice = androidInfo.brand;
-    _isPhysicalDevice = androidInfo.isPhysicalDevice;
+    _brandDevice = androidInfo.brand!;
+    _isPhysicalDevice = androidInfo.isPhysicalDevice!;
   }
 
 // проверка на наличие симкарты
