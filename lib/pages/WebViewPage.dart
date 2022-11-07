@@ -32,9 +32,6 @@ class _WebViewPageState extends State<WebViewPage> {
         return false;
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('WebView'),
-        ),
         body: Column(
           children: [
             Expanded(

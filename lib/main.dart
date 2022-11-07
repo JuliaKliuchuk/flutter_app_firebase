@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
-import 'package:flutter_app_firebase/pages/SplashPage.dart';
-import 'package:flutter_app_firebase/pages/WebViewPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+
+import 'package:flutter_app_firebase/pages/SplashPage.dart';
+import 'package:flutter_app_firebase/pages/WebViewPage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +24,7 @@ void main() async {
           return snapshot.hasData
               ? HomePage(remoteConfig: snapshot.requireData)
               : const Center(
-                  child: Text('NOT DATA'),
+                  child: CircularProgressIndicator(),
                 );
         }),
       ),
@@ -45,6 +46,8 @@ class _HomePageState extends State<HomePage> {
   static const String _pathSharedPrefsKey = 'path_pref';
 
   String _brandDevice = '';
+  // bool _isSimDevice = false;
+  bool _isPhysicalDevice = false;
   String _path = '';
 
   @override
@@ -59,20 +62,36 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _path.isEmpty || _brandDevice.contains('google')
-          ? const SplashPage()
-          : WebViewPage(url: _path),
-      floatingActionButton: FloatingActionButton(
-        onPressed: (() {
-          _resetDataPref();
-          // await widget.remoteConfig.setConfigSettings(
-          //     RemoteConfigSettings(
-          //         fetchTimeout: const Duration(seconds: 10),
-          //         minimumFetchInterval: Duration.zero));
-          // await widget.remoteConfig.fetchAndActivate();
-        }),
-        child: const Icon(Icons.refresh),
+      appBar: AppBar(
+        title: const Text('WebView'),
       ),
+      body:
+          _path.isEmpty || _brandDevice.contains('google') || _isPhysicalDevice
+              ? const SplashPage()
+              : WebViewPage(url: _path),
+      persistentFooterButtons: [
+        IconButton(
+            onPressed: (() => {
+                  _resetDataPref(),
+                  log('url delete--- $_path'),
+                }),
+            icon: const Icon(Icons.delete_outline),
+            tooltip: 'Сбросить url'),
+        const SizedBox(width: 5),
+        IconButton(
+            onPressed: (() => {
+                  _path = widget.remoteConfig.getString('url'),
+                  setState(() {
+                    _sharedPrefs.setString(_pathSharedPrefsKey, _path);
+                  }),
+                  log('url refresh --- $_path'),
+                }),
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Обновить url'),
+        const SizedBox(
+          width: 10,
+        ),
+      ],
     );
   }
 
@@ -103,11 +122,11 @@ class _HomePageState extends State<HomePage> {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
     _brandDevice = androidInfo.brand;
-    log('brand ${androidInfo.brand}');
+    _isPhysicalDevice = androidInfo.isPhysicalDevice;
   }
 
 // проверка на наличие симкарты
-  void _checkSimDevice() async {}
+  // void _checkSimDevice() async {}
 
   // сбросить path
   Future<void> _resetDataPref() async {
