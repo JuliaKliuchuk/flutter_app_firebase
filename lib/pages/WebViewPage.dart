@@ -12,6 +12,7 @@ class WebViewPage extends StatefulWidget {
 
 class _WebViewPageState extends State<WebViewPage> {
   late WebViewController webController;
+  bool _isLoading = true;
 
   @override
   Widget build(BuildContext context) {
@@ -23,15 +24,25 @@ class _WebViewPageState extends State<WebViewPage> {
         return false;
       },
       child: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
             Expanded(
               child: WebView(
                 initialUrl: widget.url,
                 javascriptMode: JavascriptMode.unrestricted,
                 onWebViewCreated: (controller) => webController = controller,
+                onPageFinished: (finish) {
+                  setState(() {
+                    _isLoading = false;
+                  });
+                },
               ),
             ),
+            _isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : Stack(),
           ],
         ),
       ),
