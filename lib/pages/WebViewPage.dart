@@ -1,12 +1,5 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-
-enum MenuOptions {
-  clearCache,
-  clearCookies,
-}
 
 class WebViewPage extends StatefulWidget {
   final String url;
@@ -26,13 +19,11 @@ class _WebViewPageState extends State<WebViewPage> {
       onWillPop: () async {
         if (await webController.canGoBack()) {
           webController.goBack();
-        } else {
-          log('Нет записей в истории');
         }
         return false;
       },
-      child: Scaffold(
-        body: Column(
+      child: SafeArea(
+        child: Column(
           children: [
             Expanded(
               child: WebView(
