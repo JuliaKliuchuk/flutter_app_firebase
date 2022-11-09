@@ -17,7 +17,6 @@ void main() async {
     MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark(),
       home: FutureBuilder<FirebaseRemoteConfig>(
         future: setupRemouteConfig(),
         builder: ((BuildContext context,
@@ -80,28 +79,6 @@ class _HomePageState extends State<HomePage> {
                   !_isPhysicalDevice
               ? SplashPage()
               : WebViewPage(url: _path),
-      persistentFooterButtons: [
-        IconButton(
-          onPressed: (() => {
-                _resetDataPref(),
-                log('url delete--- $_path'),
-              }),
-          icon: const Icon(Icons.delete_outline),
-        ),
-        const SizedBox(width: 5),
-        IconButton(
-          onPressed: (() => {
-                _path = widget.remoteConfig.getString('url'),
-                setState(() {
-                  _sharedPrefs.setString(_pathSharedPrefsKey, _path);
-                }),
-              }),
-          icon: const Icon(Icons.refresh),
-        ),
-        const SizedBox(
-          width: 10,
-        ),
-      ],
     );
   }
 
@@ -133,14 +110,6 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _brandDevice = androidInfo.model!;
       _isPhysicalDevice = androidInfo.isPhysicalDevice!;
-    });
-  }
-
-  // сбросить path
-  Future<void> _resetDataPref() async {
-    await _sharedPrefs.remove(_pathSharedPrefsKey);
-    setState(() {
-      _path = '';
     });
   }
 }

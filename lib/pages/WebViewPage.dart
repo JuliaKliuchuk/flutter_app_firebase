@@ -27,7 +27,8 @@ class _WebViewPageState extends State<WebViewPage> {
           children: [
             Expanded(
               child: WebView(
-                initialUrl: widget.url,
+                initialUrl: 'https://smartpress.by/idea/sport/',
+                // initialUrl: widget.url,
                 javascriptMode: JavascriptMode.unrestricted,
                 onWebViewCreated: (controller) => webController = controller,
               ),
