@@ -45,51 +45,59 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late SharedPreferences _sharedPrefs;
   static const String _pathSharedPrefsKey = 'path_pref';
-  static const String _isPhysicalDeviceSharedPrefsKey = 'isPhysicalDevice_pref';
-  static const String _brandDeviceSharedPrefsKey = 'brandDevice_pref';
 
-  String _brandDevice = '';
-  // bool _isSimDevice = false;
-  bool _isPhysicalDevice = false;
   String _path = '';
+  String _brandDevice = '';
+  bool _isPhysicalDevice = false;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+
     SharedPreferences.getInstance().then((pref) {
-      setState(() => {_sharedPrefs = pref});
+      setState(() => _sharedPrefs = pref);
       _checkPath();
+      _checkBrandDevice();
+    });
+
+    Future.delayed(const Duration(seconds: 2), () {
+      setState(() {
+        _isLoading = false;
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('WebView'),
-      ),
-      body:
-          _path.isEmpty || _brandDevice.contains('google') || _isPhysicalDevice
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : _path.isEmpty ||
+                  _brandDevice.contains('google') ||
+                  !_isPhysicalDevice
               ? SplashPage()
               : WebViewPage(url: _path),
       persistentFooterButtons: [
         IconButton(
-            onPressed: (() => {
-                  _resetDataPref(),
-                  log('url delete--- $_path'),
-                }),
-            icon: const Icon(Icons.delete_outline),
-            tooltip: 'Сбросить url'),
+          onPressed: (() => {
+                _resetDataPref(),
+                log('url delete--- $_path'),
+              }),
+          icon: const Icon(Icons.delete_outline),
+        ),
         const SizedBox(width: 5),
         IconButton(
-            onPressed: (() => {
-                  _path = widget.remoteConfig.getString('url'),
-                  setState(() {
-                    _sharedPrefs.setString(_pathSharedPrefsKey, _path);
-                  }),
+          onPressed: (() => {
+                _path = widget.remoteConfig.getString('url'),
+                setState(() {
+                  _sharedPrefs.setString(_pathSharedPrefsKey, _path);
                 }),
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Обновить url'),
+              }),
+          icon: const Icon(Icons.refresh),
+        ),
         const SizedBox(
           width: 10,
         ),
@@ -103,7 +111,6 @@ class _HomePageState extends State<HomePage> {
 
     if (_path.isEmpty) {
       _loadPath();
-      _checkBrandDevice();
     } else {
       return _path;
     }
@@ -111,9 +118,10 @@ class _HomePageState extends State<HomePage> {
 
 // загрузка path
   void _loadPath() {
-    final String path = widget.remoteConfig.getString('url');
+    _path = widget.remoteConfig.getString('url');
+
     setState(() {
-      _sharedPrefs.setString(_pathSharedPrefsKey, path);
+      _sharedPrefs.setString(_pathSharedPrefsKey, _path);
     });
   }
 
@@ -121,17 +129,12 @@ class _HomePageState extends State<HomePage> {
   void _checkBrandDevice() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    _brandDevice = androidInfo.model;
-    _isPhysicalDevice = androidInfo.isPhysicalDevice;
+
     setState(() {
-      _sharedPrefs.setString(_brandDeviceSharedPrefsKey, androidInfo.model);
-      _sharedPrefs.setBool(
-          _isPhysicalDeviceSharedPrefsKey, androidInfo.isPhysicalDevice);
+      _brandDevice = androidInfo.model!;
+      _isPhysicalDevice = androidInfo.isPhysicalDevice!;
     });
   }
-
-// проверка на наличие симкарты
-  // void _checkSimDevice() async {}
 
   // сбросить path
   Future<void> _resetDataPref() async {
