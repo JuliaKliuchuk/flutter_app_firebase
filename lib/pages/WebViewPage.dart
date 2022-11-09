@@ -23,28 +23,23 @@ class _WebViewPageState extends State<WebViewPage> {
         }
         return false;
       },
-      child: SafeArea(
-        child: Stack(
-          children: [
-            Expanded(
-              child: WebView(
-                initialUrl: widget.url,
-                javascriptMode: JavascriptMode.unrestricted,
-                onWebViewCreated: (controller) => webController = controller,
-                onPageFinished: (finish) {
-                  setState(() {
-                    _isLoading = false;
-                  });
-                },
-              ),
-            ),
-            _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(),
-                  )
-                : Stack(),
-          ],
-        ),
+      child: Stack(
+        children: <Widget>[
+          _isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : const SizedBox(),
+          WebView(
+            initialUrl: widget.url,
+            javascriptMode: JavascriptMode.unrestricted,
+            onPageFinished: (finish) {
+              setState(() {
+                _isLoading = false;
+              });
+            },
+          ),
+        ],
       ),
     );
   }
